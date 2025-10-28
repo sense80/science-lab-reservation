@@ -30,7 +30,7 @@
 
 @keyframes slideUp {
   from {
-    transform: translateY(20px);
+    transform: translateY(10px);
     opacity: 0;
   }
   to {
@@ -40,10 +40,10 @@
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.15s ease-out;
 }
 
 .animate-slideUp {
-  animation: slideUp 0.3s ease-out;
+  animation: slideUp 0.15s ease-out;
 }
 

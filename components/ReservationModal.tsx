@@ -28,10 +28,11 @@ export default function ReservationModal({
   const [teacherName, setTeacherName] = useState('');
   const [subject, setSubject] = useState('');
   const [classInfo, setClassInfo] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!teacherName.trim()) {
@@ -39,16 +40,27 @@ export default function ReservationModal({
       return;
     }
 
-    onSubmit({
-      teacherName: teacherName.trim(),
-      subject: subject.trim() || undefined,
-      classInfo: classInfo.trim() || undefined,
-    });
+    if (isSubmitting) return; // 중복 제출 방지
 
-    // 초기화
-    setTeacherName('');
-    setSubject('');
-    setClassInfo('');
+    setIsSubmitting(true);
+    
+    try {
+      await onSubmit({
+        teacherName: teacherName.trim(),
+        subject: subject.trim() || undefined,
+        classInfo: classInfo.trim() || undefined,
+      });
+
+      // 성공 시 초기화 및 닫기
+      setTeacherName('');
+      setSubject('');
+      setClassInfo('');
+      onClose();
+    } catch (error) {
+      console.error('예약 실패:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -149,9 +161,10 @@ export default function ReservationModal({
             </button>
             <button
               type="submit"
-              className={`flex-1 px-4 py-3 ${buttonBgColor} text-white font-semibold rounded-lg active:scale-98 transition-all duration-200 shadow-lg`}
+              disabled={isSubmitting}
+              className={`flex-1 px-4 py-3 ${buttonBgColor} text-white font-semibold rounded-lg active:scale-98 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              예약하기
+              {isSubmitting ? '예약 중...' : '예약하기'}
             </button>
           </div>
         </form>

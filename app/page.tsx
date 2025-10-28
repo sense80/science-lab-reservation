@@ -81,6 +81,8 @@ export default function Home() {
   }) => {
     if (!selectedSlot) return;
 
+    console.log('🔄 예약 생성 시작:', selectedSlot);
+
     // 로컬 state에서 중복 확인 (빠름)
     const exists = reservations.some(
       r => r.date === selectedSlot.date && 
@@ -90,7 +92,7 @@ export default function Home() {
 
     if (exists) {
       alert('이미 예약된 시간입니다.');
-      return;
+      throw new Error('이미 예약된 시간');
     }
 
     const dateObj = new Date(selectedSlot.date);
@@ -107,10 +109,12 @@ export default function Home() {
     });
 
     if (result.success) {
-      setIsModalOpen(false);
-      setSelectedSlot(null);
+      console.log('✅ 예약 생성 성공:', result.id);
+      // 모달은 ReservationModal에서 닫음
     } else {
+      console.error('❌ 예약 생성 실패:', result.error);
       alert('예약 생성에 실패했습니다. 다시 시도해주세요.');
+      throw new Error('예약 생성 실패');
     }
   }, [selectedSlot, reservations]);
 
