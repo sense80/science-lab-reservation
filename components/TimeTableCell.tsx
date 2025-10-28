@@ -21,7 +21,7 @@ const TimeTableCell = ({
   reservation,
   onCellClick,
   onDeleteReservation,
-}: TimeTableCellProps) {
+}: TimeTableCellProps) => {
   const handleClick = () => {
     if (!reservation) {
       onCellClick(date, period, room);

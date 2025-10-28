@@ -19,7 +19,7 @@ const TimeTable = ({
   reservations,
   onCellClick,
   onDeleteReservation,
-}: TimeTableProps) {
+}: TimeTableProps) => {
   // 특정 날짜, 교시, 과학실에 해당하는 예약 찾기
   const findReservation = (date: string, period: number): Reservation | undefined => {
     return reservations.find(
