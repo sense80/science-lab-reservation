@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Header from '@/components/Header';
 import TimeTable from '@/components/TimeTable';
 import ReservationModal from '@/components/ReservationModal';
@@ -23,8 +23,7 @@ import {
 import { Loader2 } from 'lucide-react';
 
 export default function Home() {
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(getSeoulDate()));
-  const [weekDays, setWeekDays] = useState<Date[]>([]);
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => getWeekStart(getSeoulDate()));
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,11 +33,8 @@ export default function Home() {
     room: RoomType;
   } | null>(null);
 
-  // 주의 날짜 계산
-  useEffect(() => {
-    const days = getWeekDays(currentWeekStart);
-    setWeekDays(days);
-  }, [currentWeekStart]);
+  // 주의 날짜 계산 (메모이제이션)
+  const weekDays = useMemo(() => getWeekDays(currentWeekStart), [currentWeekStart]);
 
   // 예약 데이터 실시간 구독
   useEffect(() => {
@@ -48,12 +44,17 @@ export default function Home() {
     const endDate = formatDateToString(weekDays[weekDays.length - 1]);
 
     setLoading(true);
+    console.log('🔄 예약 데이터 구독 시작...');
     const unsubscribe = subscribeToReservations(startDate, endDate, (data) => {
+      console.log('✅ 예약 데이터 수신:', data);
       setReservations(data);
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      console.log('🔌 예약 구독 해제');
+      unsubscribe();
+    };
   }, [weekDays]);
 
   // 이전 주로 이동
@@ -73,18 +74,18 @@ export default function Home() {
   };
 
   // 예약 생성 핸들러
-  const handleCreateReservation = async (data: {
+  const handleCreateReservation = useCallback(async (data: {
     teacherName: string;
     subject?: string;
     classInfo?: string;
   }) => {
     if (!selectedSlot) return;
 
-    // 중복 예약 확인
-    const exists = await checkReservationExists(
-      selectedSlot.date,
-      selectedSlot.period,
-      selectedSlot.room
+    // 로컬 state에서 중복 확인 (빠름)
+    const exists = reservations.some(
+      r => r.date === selectedSlot.date && 
+           r.period === selectedSlot.period && 
+           r.room === selectedSlot.room
     );
 
     if (exists) {
@@ -111,16 +112,16 @@ export default function Home() {
     } else {
       alert('예약 생성에 실패했습니다. 다시 시도해주세요.');
     }
-  };
+  }, [selectedSlot, reservations]);
 
   // 예약 삭제 핸들러
-  const handleDeleteReservation = async (id: string) => {
+  const handleDeleteReservation = useCallback(async (id: string) => {
     const result = await deleteReservation(id);
     
     if (!result.success) {
       alert('예약 삭제에 실패했습니다. 다시 시도해주세요.');
     }
-  };
+  }, []);
 
   return (
     <div className="min-h-screen">

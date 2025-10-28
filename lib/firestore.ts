@@ -86,22 +86,30 @@ export function subscribeToReservations(
   endDate: string,
   callback: (reservations: Reservation[]) => void
 ) {
-  const q = query(
-    collection(db, COLLECTION_NAME),
-    where('date', '>=', startDate),
-    where('date', '<=', endDate)
-  );
+  // 모든 예약을 가져옴 (과학실 예약은 데이터가 많지 않음)
+  const q = query(collection(db, COLLECTION_NAME));
   
-  return onSnapshot(q, (querySnapshot) => {
-    const reservations: Reservation[] = [];
-    querySnapshot.forEach((doc) => {
-      reservations.push({
-        id: doc.id,
-        ...doc.data(),
-      } as Reservation);
-    });
-    callback(reservations);
-  });
+  return onSnapshot(
+    q,
+    (querySnapshot) => {
+      const reservations: Reservation[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        reservations.push({
+          id: doc.id,
+          ...data,
+        } as Reservation);
+      });
+      
+      console.log('📊 예약 데이터 로드됨:', reservations.length, '개');
+      callback(reservations);
+    },
+    (error) => {
+      console.error('❌ 예약 데이터 구독 에러:', error);
+      // 에러 발생 시 빈 배열 반환
+      callback([]);
+    }
+  );
 }
 
 // 특정 시간대 예약 확인

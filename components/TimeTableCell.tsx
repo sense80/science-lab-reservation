@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { X } from 'lucide-react';
 import { RoomType, Reservation } from '@/types';
 import { formatReservedTime } from '@/lib/utils';
@@ -13,7 +14,7 @@ interface TimeTableCellProps {
   onDeleteReservation: (id: string) => void;
 }
 
-export default function TimeTableCell({
+const TimeTableCell = ({
   date,
   period,
   room,
@@ -73,5 +74,7 @@ export default function TimeTableCell({
       </div>
     </td>
   );
-}
+};
+
+export default React.memo(TimeTableCell);
 

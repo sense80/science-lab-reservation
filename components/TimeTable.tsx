@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { RoomType, Reservation } from '@/types';
 import { formatDateToString, getDayOfWeek, PERIODS } from '@/lib/utils';
 import TimeTableCell from './TimeTableCell';
@@ -12,7 +13,7 @@ interface TimeTableProps {
   onDeleteReservation: (id: string) => void;
 }
 
-export default function TimeTable({
+const TimeTable = ({
   room,
   weekDays,
   reservations,
@@ -100,5 +101,7 @@ export default function TimeTable({
       </div>
     </div>
   );
-}
+};
+
+export default React.memo(TimeTable);
 
